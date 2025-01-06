@@ -9,6 +9,7 @@ def load_pokemon_data(db: Session):
         pokemon_data = json.load(f)
 
         for item in pokemon_data:
+            # Create a dictionary for Pokémon data
             pokemon_data_dict = {
                 "id": item["id"],
                 "name": item["name"],
@@ -24,10 +25,9 @@ def load_pokemon_data(db: Session):
             # Check if Pokémon already exists
             existing_pokemon = db.query(Pokemon).filter(Pokemon.id == item["id"]).first()
             if existing_pokemon:
-                pass
+                pass  # Pokémon already exists, do nothing
             else:
                 # Create new Pokémon
-                
                 create_pokemon(db=db, pokemon=pokemon_data_dict) 
 
 if __name__ == "__main__":

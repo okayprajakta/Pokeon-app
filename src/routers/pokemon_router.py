@@ -5,7 +5,6 @@ from src.schemas.pokemon_schema import PokemonCreate, PokemonUpdate, Pokemon, Po
 from typing import List, Optional
 from src.config.database import SessionLocal
 
-
 router = APIRouter()
 
 # Dependency for database session
@@ -32,7 +31,7 @@ def get_pokemon_endpoint(pokemon_id: int, db: Session = Depends(get_db)):
     print("passing..............")
     db_pokemon = get_pokemon(db, pokemon_id)
 
-    print("db_pokemon -->",db_pokemon)
+    print("db_pokemon -->", db_pokemon)
     if db_pokemon is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Pokemon not found")
     return db_pokemon

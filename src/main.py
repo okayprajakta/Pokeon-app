@@ -6,8 +6,12 @@ from src.data.load_data import load_pokemon_data
 from src.config.database import SessionLocal
 
 app = FastAPI()
+
+# Create all tables in the database
 Base.metadata.create_all(bind=engine)
-load_pokemon_data(db = SessionLocal())
+
+# Load Pokémon data into the database
+load_pokemon_data(db=SessionLocal())
 
 # Include the Pokémon router
 app.include_router(pokemon_router.router, tags=["Pokémon"])
