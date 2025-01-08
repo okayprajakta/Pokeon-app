@@ -1,6 +1,7 @@
 from sqlalchemy import Column, Integer, String, JSON
 from src.config.database import Base
 
+
 class Pokemon(Base):
     __tablename__ = "pokemons"  
 

@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, HttpUrl
 from typing import List, Optional
 
 class Ability(BaseModel):
@@ -22,8 +22,8 @@ class PokemonBase(BaseModel):
     height: Optional[int] = None
     weight: Optional[int] = None
     xp: Optional[int] = None
-    image_url: Optional[str] = None
-    pokemon_url: Optional[str] = None
+    image_url: Optional[HttpUrl] = None
+    pokemon_url: Optional[HttpUrl] = None
     abilities: Optional[List[Ability]] = None
     stats: Optional[List[Stat]] = None
     types: Optional[List[Type]] = None
@@ -35,8 +35,8 @@ class PokemonCreate(PokemonBase):
     height: int
     weight: int
     xp: int
-    image_url: str
-    pokemon_url: str
+    image_url: HttpUrl 
+    pokemon_url: HttpUrl
     abilities: List[Ability]
     stats: List[Stat]
     types: List[Type]
@@ -47,8 +47,8 @@ class PokemonUpdate(BaseModel):
     height: Optional[int] = None
     weight: Optional[int] = None
     xp:   Optional[int] = None
-    image_url: Optional[str] = None
-    pokemon_url: Optional[str] = None
+    image_url: Optional[HttpUrl] = None
+    pokemon_url: Optional[HttpUrl] = None
     abilities: Optional[List[Ability]] = None 
     stats: Optional[List[Stat]] = None
     types: Optional[List[Type]] = None
