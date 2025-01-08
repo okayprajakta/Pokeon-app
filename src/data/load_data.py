@@ -25,7 +25,7 @@ def load_pokemon_data(db: Session):
             # Check if Pokémon already exists
             existing_pokemon = db.query(Pokemon).filter(Pokemon.id == item["id"]).first()
             if existing_pokemon:
-                pass  # Pokémon already exists, do nothing
+                pass 
             else:
                 # Create new Pokémon
                 create_pokemon(db=db, pokemon=pokemon_data_dict) 

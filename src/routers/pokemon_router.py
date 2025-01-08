@@ -4,6 +4,7 @@ from src.repositories.pokemon_repository import create_pokemon, get_pokemon, get
 from src.schemas.pokemon_schema import PokemonCreate, PokemonUpdate, Pokemon, PokemonBase  # Updated import
 from typing import List, Optional
 from src.config.database import SessionLocal
+from src.middleware.auth_middleware import JWTBearer
 
 router = APIRouter()
 
@@ -15,7 +16,7 @@ def get_db():
     finally:
         db.close()
 
-@router.post("/pokemon/", response_model=Pokemon, status_code=status.HTTP_201_CREATED)
+@router.post("/pokemon/", response_model=Pokemon, status_code=status.HTTP_201_CREATED, dependencies=[Depends(JWTBearer())])
 def create_pokemon_endpoint(pokemon: PokemonCreate, db: Session = Depends(get_db)):
     """
     Endpoint to create a new Pokémon. 
@@ -23,7 +24,7 @@ def create_pokemon_endpoint(pokemon: PokemonCreate, db: Session = Depends(get_db
     """
     return create_pokemon(db=db, pokemon=pokemon)
 
-@router.get("/pokemon/{pokemon_id}", response_model=Pokemon, status_code=status.HTTP_200_OK)
+@router.get("/pokemon/{pokemon_id}", response_model=Pokemon, status_code=status.HTTP_200_OK, dependencies=[Depends(JWTBearer())])
 def get_pokemon_endpoint(pokemon_id: int, db: Session = Depends(get_db)):
     """
     Endpoint to retrieve a Pokémon by ID.
@@ -36,7 +37,7 @@ def get_pokemon_endpoint(pokemon_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Pokemon not found")
     return db_pokemon
 
-@router.get("/pokemon/", response_model=List[PokemonBase], status_code=status.HTTP_200_OK)
+@router.get("/pokemon/", response_model=List[PokemonBase], status_code=status.HTTP_200_OK, dependencies=[Depends(JWTBearer())])
 def get_all_pokemon_endpoint(
     skip: int = 0,
     limit: int = 10,
@@ -61,7 +62,7 @@ def get_all_pokemon_endpoint(
         max_weight=max_weight
     )
 
-@router.patch("/pokemon/{pokemon_id}", response_model=Pokemon, status_code=status.HTTP_200_OK)
+@router.patch("/pokemon/{pokemon_id}", response_model=Pokemon, status_code=status.HTTP_200_OK, dependencies=[Depends(JWTBearer())])
 def update_pokemon_endpoint(pokemon_id: int, pokemon: PokemonUpdate, db: Session = Depends(get_db)):
     """
     Endpoint to partially update a Pokémon.
@@ -72,7 +73,7 @@ def update_pokemon_endpoint(pokemon_id: int, pokemon: PokemonUpdate, db: Session
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Pokemon not found")
     return db_pokemon
 
-@router.delete("/pokemon/{pokemon_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/pokemon/{pokemon_id}", status_code=status.HTTP_204_NO_CONTENT, dependencies=[Depends(JWTBearer())])
 def delete_pokemon_endpoint(pokemon_id: int, db: Session = Depends(get_db)):
     """
     Endpoint to delete a Pokémon by ID.
@@ -81,3 +82,5 @@ def delete_pokemon_endpoint(pokemon_id: int, db: Session = Depends(get_db)):
     if db_pokemon is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Pokemon not found")
     return None
+
+

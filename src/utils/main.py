@@ -6,7 +6,6 @@ from src.config.database import SQLALCHEMY_DATABASE_URL  # Make sure you define 
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-# Dependency that provides a database session to your endpoint functions
 def get_db():
     db = SessionLocal()
     try:
