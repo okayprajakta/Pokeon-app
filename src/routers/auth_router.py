@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from src.schemas.user_schema import UserCreate, UserOut
-from src.models.user_model import User
+from src.models.pokemon_model import User
 from src.utils.main import get_db
 from src.services.auth_service import create_access_token, verify_password, get_password_hash
 

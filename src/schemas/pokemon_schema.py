@@ -35,8 +35,8 @@ class PokemonCreate(PokemonBase):
     height: int
     weight: int
     xp: int
-    image_url: HttpUrl 
-    pokemon_url: HttpUrl
+    image_url: str
+    pokemon_url: str
     abilities: List[Ability]
     stats: List[Stat]
     types: List[Type]
