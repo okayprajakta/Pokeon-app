@@ -3,7 +3,7 @@ from jose import jwt
 from passlib.context import CryptContext
 from src.config.settings import app_config
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+pwd_context = CryptContext(schemes=["bcrypt"])
 
 def create_access_token(data: dict):
     to_encode = data.copy()
