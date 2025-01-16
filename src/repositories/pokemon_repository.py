@@ -1,6 +1,7 @@
+#src/repositories/pokemon_repository.py
 from sqlalchemy.orm import Session
 from src.models.pokemon_model import Pokemon
-from src.schemas.pokemon_schema import PokemonCreate, PokemonUpdate, PokemonBase  # Updated import path
+from src.schemas.pokemon_schema import PokemonCreate, PokemonUpdate, PokemonBase
 from fastapi import HTTPException, status
 
 def get_pokemon(db: Session, pokemon_id: int):
@@ -26,14 +27,32 @@ def get_all_pokemon(db: Session, skip: int = 0, limit: int = 100, name: str = No
 
 def create_pokemon(db: Session, pokemon: PokemonCreate):
     """Create a new Pokémon."""
-    existing_pokemon = get_pokemon(db, pokemon.id)
+    existing_pokemon = db.query(Pokemon).filter(Pokemon.id == pokemon.id).first()
     if existing_pokemon:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Pokemon already exists")
-    db_pokemon = Pokemon(**pokemon.dict())
+    
+    # Convert Ability, Stat, and Type objects to dictionaries
+    abilities = [ability.dict() for ability in pokemon.abilities]
+    stats = [stat.dict() for stat in pokemon.stats]
+    types = [type_.dict() for type_ in pokemon.types]
+    
+    db_pokemon = Pokemon(
+        id=pokemon.id,
+        name=pokemon.name,
+        height=pokemon.height,
+        weight=pokemon.weight,
+        xp=pokemon.xp,
+        pokemon_url=pokemon.pokemon_url,
+        abilities=abilities,
+        stats=stats,
+        types=types,
+        image_url=pokemon.image_url  # Make sure this is image_url
+    )
+    
     db.add(db_pokemon)  
     db.commit()  
     db.refresh(db_pokemon)  
-    return db_pokemon  
+    return db_pokemon
 
 def update_pokemon(db: Session, pokemon_id: int, pokemon: PokemonUpdate):
     """Update an existing Pokémon."""
@@ -51,4 +70,4 @@ def delete_pokemon(db: Session, pokemon_id: int):
     if db_pokemon:
         db.delete(db_pokemon)  
         db.commit()  
-    return db_pokemon 
+    return db_pokemon

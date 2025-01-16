@@ -1,3 +1,4 @@
+#src/utils/main.py
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from src.config.database import SQLALCHEMY_DATABASE_URL  # Make sure you define the DATABASE_URL in your config

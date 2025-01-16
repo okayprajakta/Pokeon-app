@@ -1,4 +1,5 @@
-from pydantic import BaseModel, HttpUrl
+#src/schemas/pokemon_schema.py
+from pydantic import BaseModel
 from typing import List, Optional
 
 class Ability(BaseModel):
@@ -22,21 +23,21 @@ class PokemonBase(BaseModel):
     height: Optional[int] = None
     weight: Optional[int] = None
     xp: Optional[int] = None
-    image_url: Optional[HttpUrl] = None
-    pokemon_url: Optional[HttpUrl] = None
+    image_url: Optional[str] = None
+    pokemon_url: Optional[str] = None
     abilities: Optional[List[Ability]] = None
     stats: Optional[List[Stat]] = None
     types: Optional[List[Type]] = None
 
-class PokemonCreate(PokemonBase):
+class PokemonCreate(BaseModel):
     """Schema for creating a new Pokémon."""
     id: Optional[int]  # Allow user to provide an ID during creation
     name: str          # Make `name` mandatory for creation
     height: int
     weight: int
     xp: int
-    image_url: HttpUrl
-    pokemon_url: HttpUrl
+    image_url: Optional[str] = None  # Make sure this matches the model field
+    pokemon_url: str
     abilities: List[Ability]
     stats: List[Stat]
     types: List[Type]
@@ -47,8 +48,8 @@ class PokemonUpdate(BaseModel):
     height: Optional[int] = None
     weight: Optional[int] = None
     xp:   Optional[int] = None
-    image_url: Optional[HttpUrl] = None
-    pokemon_url: Optional[HttpUrl] = None
+    image_url: Optional[str] = None
+    pokemon_url: Optional[str] = None
     abilities: Optional[List[Ability]] = None 
     stats: Optional[List[Stat]] = None
     types: Optional[List[Type]] = None

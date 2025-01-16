@@ -1,3 +1,4 @@
+#src/data/load_data.py
 import json
 from sqlalchemy.orm import Session
 from src.models.pokemon_model import Pokemon

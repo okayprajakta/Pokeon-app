@@ -1,2 +1,2 @@
-import bcrypt
-print("bcrypt installed successfully!")
+import PIL
+print(PIL.__version__)

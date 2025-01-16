@@ -1,3 +1,4 @@
+#src/main.py
 from fastapi import FastAPI
 from src.routers import pokemon_router, auth_router
 # from src.models.pokemon_model import Base as PokemonBase

@@ -6,8 +6,8 @@
         "weight": 69,
         "xp": 64,
         "image_url": "https://pokeres.bastionbot.org/images/pokemon/1.png",
-        "pokemon_url": "https://www.pokemon.com/us/pokedex/bulbasaur",
-        "abilities": [
+        "pokemon_url": "ttps://www.pokemon.com/us/pokedex/bulbasaur",
+        "abilities": [h
             {
                 "name": "overgrow",
                 "is_hidden": false

@@ -1,14 +1,17 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Query
+#src/routers/pokemon_router.py
+import os
+from fastapi import APIRouter, Depends, HTTPException, status, Query, File, UploadFile, Form
 from sqlalchemy.orm import Session
 from src.repositories.pokemon_repository import create_pokemon, get_pokemon, get_all_pokemon, update_pokemon, delete_pokemon
-from src.schemas.pokemon_schema import PokemonCreate, PokemonUpdate, Pokemon, PokemonBase  # Updated import
+from src.schemas.pokemon_schema import PokemonCreate, PokemonUpdate, Pokemon, PokemonBase
 from typing import List, Optional
 from src.config.database import SessionLocal
 from src.middleware.auth_middleware import JWTBearer
+from src.config.aws_s3 import upload_to_s3
+import json
 
 router = APIRouter()
 
-# Dependency for database session
 def get_db():
     db = SessionLocal()
     try:
@@ -17,11 +20,48 @@ def get_db():
         db.close()
 
 @router.post("/pokemon/", response_model=Pokemon, status_code=status.HTTP_201_CREATED, dependencies=[Depends(JWTBearer())])
-def create_pokemon_endpoint(pokemon: PokemonCreate, db: Session = Depends(get_db)):
+def create_pokemon_endpoint(
+    id: int = Form(...),
+    name: str = Form(...),
+    height: int = Form(...),
+    weight: int = Form(...),
+    xp: int = Form(...),
+    pokemon_url: str = Form(...),
+    abilities: str = Form(...),  # JSON string
+    stats: str = Form(...),  # JSON string
+    types: str = Form(...),  # JSON string
+    db: Session = Depends(get_db),
+    image: Optional[UploadFile] = File(None)  # Image file
+):
     """
-    Endpoint to create a new Pokémon. 
+    Endpoint to create a new Pokémon.
     Users can specify their own ID or let it be auto-generated.
     """
+    # Parse JSON strings into Python objects
+    abilities = json.loads(abilities)
+    stats = json.loads(stats)
+    types = json.loads(types)
+
+    # Handle the image file if provided
+    image_url = None
+    if image and image.filename:
+        object_name = f"images/{image.filename}"
+        image_url = upload_to_s3(image.file, os.getenv("S3_BUCKET_NAME"), object_name)
+
+    # Create PokemonCreate object
+    pokemon = PokemonCreate(
+        id=id,
+        name=name,
+        height=height,
+        weight=weight,
+        xp=xp,
+        pokemon_url=pokemon_url,
+        abilities=abilities,
+        stats=stats,
+        types=types,
+        image_url=image_url  # Store the image URL here
+    )
+
     return create_pokemon(db=db, pokemon=pokemon)
 
 @router.get("/pokemon/{pokemon_id}", response_model=Pokemon, status_code=status.HTTP_200_OK, dependencies=[Depends(JWTBearer())])
@@ -29,10 +69,8 @@ def get_pokemon_endpoint(pokemon_id: int, db: Session = Depends(get_db)):
     """
     Endpoint to retrieve a Pokémon by ID.
     """
-    print("passing..............")
     db_pokemon = get_pokemon(db, pokemon_id)
 
-    print("db_pokemon -->", db_pokemon)
     if db_pokemon is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Pokemon not found")
     return db_pokemon
@@ -82,5 +120,3 @@ def delete_pokemon_endpoint(pokemon_id: int, db: Session = Depends(get_db)):
     if db_pokemon is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Pokemon not found")
     return None
-
-
