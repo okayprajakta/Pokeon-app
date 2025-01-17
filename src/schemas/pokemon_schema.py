@@ -1,4 +1,3 @@
-#src/schemas/pokemon_schema.py
 from pydantic import BaseModel
 from typing import List, Optional
 
@@ -48,7 +47,6 @@ class PokemonUpdate(BaseModel):
     height: Optional[int] = None
     weight: Optional[int] = None
     xp:   Optional[int] = None
-    image_url: Optional[str] = None
     pokemon_url: Optional[str] = None
     abilities: Optional[List[Ability]] = None 
     stats: Optional[List[Stat]] = None
@@ -57,6 +55,5 @@ class PokemonUpdate(BaseModel):
 class Pokemon(PokemonBase):
     """Schema for Pokémon response with mandatory ID."""
     id: int  # ID is mandatory in the response
-
     class Config:
         from_attributes = True  # Enable ORM mode

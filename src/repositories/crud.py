@@ -1,4 +1,3 @@
-#src/repositories/crud.py
 from sqlalchemy.orm import Session
 from src.models.pokemon_model import Pokemon
 from src.schemas.pokemon_schema import PokemonCreate, PokemonUpdate

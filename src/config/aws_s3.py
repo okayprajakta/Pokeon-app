@@ -1,7 +1,8 @@
-#src/config/aws_s3.py
 import boto3
 import os
-from botocore.exceptions import NoCredentialsError, PartialCredentialsError
+from botocore.exceptions import NoCredentialsError, PartialCredentialsError, ClientError
+from fastapi import HTTPException, UploadFile
+import imghdr
 
 def upload_to_s3(file, bucket_name, object_name):
     """
@@ -29,3 +30,32 @@ def upload_to_s3(file, bucket_name, object_name):
         raise ValueError("Invalid AWS credentials.")
     except Exception as e:
         raise ValueError(f"Failed to upload file to S3: {e}")
+
+ALLOWED_EXTENSIONS = {"jpg", "jpeg", "png", "tiff", "gif", "bmp", "raw"}
+ALLOWED_MIME_TYPES = {"image/jpg","image/jpeg", "image/png", "image/tiff", "image/gif", "image/bmp", "image/x-raw"}
+
+def validate_image_file(file: UploadFile):
+    # Check file extension
+    extension = file.filename.split(".")[-1].lower()
+    if extension not in ALLOWED_EXTENSIONS:
+        raise HTTPException(status_code=400, detail="Invalid file extension provided. Allowed extensions: jpg, jpeg, png, tiff, gif, bmp, raw")
+
+    # Check MIME type
+    if file.content_type not in ALLOWED_MIME_TYPES:
+        raise HTTPException(status_code=400, detail="Invalid file type provided. Allowed MIME types: image/jpeg, image/png, image/tiff, image/gif, image/bmp, image/x-raw")
+
+    # Check if the file is a valid image
+    file.file.seek(0)
+    if imghdr.what(file.file) not in ALLOWED_EXTENSIONS:
+        raise HTTPException(status_code=400, detail="Invalid image file")
+    file.file.seek(0)
+
+
+def check_image_exists_in_s3(bucket_name: str, object_name: str) -> bool:
+    """Check if an image exists in the S3 bucket."""
+    s3 = boto3.client('s3')
+    try:
+        s3.head_object(Bucket=bucket_name, Key=object_name)
+        return True
+    except ClientError:
+        return False

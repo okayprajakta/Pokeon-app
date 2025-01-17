@@ -1,8 +1,11 @@
-#src/repositories/pokemon_repository.py
 from sqlalchemy.orm import Session
 from src.models.pokemon_model import Pokemon
 from src.schemas.pokemon_schema import PokemonCreate, PokemonUpdate, PokemonBase
-from fastapi import HTTPException, status
+from fastapi import HTTPException, status, UploadFile
+from typing import Optional
+from src.config.aws_s3 import upload_to_s3, validate_image_file
+import os
+import json
 
 def get_pokemon(db: Session, pokemon_id: int):
     """Retrieve a Pokémon by its ID."""
@@ -54,15 +57,36 @@ def create_pokemon(db: Session, pokemon: PokemonCreate):
     db.refresh(db_pokemon)  
     return db_pokemon
 
-def update_pokemon(db: Session, pokemon_id: int, pokemon: PokemonUpdate):
+def update_pokemon(db: Session, pokemon_id: int, name: Optional[str], height: Optional[int], weight: Optional[int], xp: Optional[int], pokemon_url: Optional[str], abilities: Optional[str], stats: Optional[str], types: Optional[str], image: Optional[UploadFile]):
     """Update an existing Pokémon."""
     db_pokemon = db.query(Pokemon).filter(Pokemon.id == pokemon_id).first()
     if db_pokemon:
-        for key, value in pokemon.dict(exclude_unset=True).items():
-            setattr(db_pokemon, key, value)  
-        db.commit()  
-        db.refresh(db_pokemon)  
-    return db_pokemon  
+        # Handle the image file if provided
+        if image and image.filename:
+            validate_image_file(image)
+            object_name = f"images/{image.filename}"
+            image_url = upload_to_s3(image.file, os.getenv("S3_BUCKET_NAME"), object_name)
+            setattr(db_pokemon, 'image_url', image_url)
+
+        # Update other fields
+        update_data = {
+            "name": name,
+            "height": height,
+            "weight": weight,
+            "xp": xp,
+            "pokemon_url": pokemon_url,
+            "abilities": json.loads(abilities) if abilities else None,
+            "stats": json.loads(stats) if stats else None,
+            "types": json.loads(types) if types else None
+        }
+
+        for key, value in update_data.items():
+            if value is not None:
+                setattr(db_pokemon, key, value)
+        
+        db.commit()
+        db.refresh(db_pokemon)
+    return db_pokemon
 
 def delete_pokemon(db: Session, pokemon_id: int):
     """Delete a Pokémon by its ID."""

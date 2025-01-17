@@ -1,4 +1,3 @@
-#src/models/pokemon_model.py
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import declarative_base
