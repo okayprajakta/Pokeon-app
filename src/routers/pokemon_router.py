@@ -20,7 +20,7 @@ def get_db():
         db.close()
 
 
-@router.post("/pokemon/", response_model=Pokemon, status_code=status.HTTP_201_CREATED, dependencies=[Depends(JWTBearer())])
+@router.post("/pokemon/", response_model=Pokemon, status_code=status.HTTP_201_CREATED)#, dependencies=[Depends(JWTBearer())])
 def create_pokemon_endpoint(
     id: int = Form(...),
     name: str = Form(...),
