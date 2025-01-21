@@ -65,7 +65,7 @@ def update_pokemon(db: Session, pokemon_id: int, name: Optional[str], height: Op
         if image and image.filename:
             validate_image_file(image)
             object_name = f"images/{image.filename}"
-            image_url = upload_to_s3(image.file, os.getenv("S3_BUCKET_NAME"), object_name)
+            image_url = upload_to_s3(image, os.getenv("S3_BUCKET_NAME"), object_name)
             setattr(db_pokemon, 'image_url', image_url)
 
         # Update other fields

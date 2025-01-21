@@ -27,7 +27,8 @@ def upload_file_to_s3(file_name: str, bucket_name: str, object_name: str = None)
 
 
 if __name__ == "__main__":
-    file_name = "my_text.txt"  
+
+    file_name = "Notes.txt"
     bucket_name = "pokemon-s3-apro64"  
     object_name = "notes.txt" 
 

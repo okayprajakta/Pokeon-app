@@ -9,6 +9,9 @@ from src.middleware.auth_middleware import JWTBearer
 import json
 from src.config.aws_s3 import upload_to_s3, validate_image_file, check_image_exists_in_s3
 from urllib.parse import urlparse
+from dotenv import load_dotenv
+
+load_dotenv()  
 
 router = APIRouter()
 
@@ -19,8 +22,7 @@ def get_db():
     finally:
         db.close()
 
-
-@router.post("/pokemon/", response_model=Pokemon, status_code=status.HTTP_201_CREATED)#, dependencies=[Depends(JWTBearer())])
+@router.post("/pokemon/", response_model=Pokemon, status_code=status.HTTP_201_CREATED, dependencies=[Depends(JWTBearer())])
 def create_pokemon_endpoint(
     id: int = Form(...),
     name: str = Form(...),
@@ -28,29 +30,30 @@ def create_pokemon_endpoint(
     weight: int = Form(...),
     xp: int = Form(...),
     pokemon_url: str = Form(...),
-    abilities: str = Form(..., description='Example: [{"name": "Static", "is_hidden": false}, {"name": "Lightning Rod", "is_hidden": true}]'),  # JSON string
-    stats: str = Form(..., description='Example: [{"name": "Speed", "base_stat": 90}, {"name": "Attack", "base_stat": 55}]'),  # JSON string
-    types: str = Form(..., description='Example: [{"name": "Electric"}]'),  # JSON string
+    abilities: str = Form(..., description='Example: [{"name": "Static", "is_hidden": false}, {"name": "Lightning Rod", "is_hidden": true}]'),  
+    stats: str = Form(..., description='Example: [{"name": "Speed", "base_stat": 90}, {"name": "Attack", "base_stat": 55}]'), 
+    types: str = Form(..., description='Example: [{"name": "Electric"}]'),  
     db: Session = Depends(get_db),
-    image: Optional[UploadFile] = File(None)  # Image file
+    image: Optional[UploadFile] = File(None)  
 ):
     """
     Endpoint to create a new Pokémon.
     Users can specify their own ID or let it be auto-generated.
     """
-    # Parse JSON strings into Python objects
     abilities = json.loads(abilities)
     stats = json.loads(stats)
     types = json.loads(types)
 
     # Handle the image file if provided
-    # Handle the image file if provided
-    default_image_url = f"https://pokeres.bastionbot.org/images/{name}.png"  # Customize the default image URL
+    default_image_url = f"https://pokeres.bastionbot.org/images/{name}.png"  
     image_url = default_image_url
     if image and image.filename:
         validate_image_file(image)
         object_name = f"images/{image.filename}"
-        image_url = upload_to_s3(image.file, os.getenv("S3_BUCKET_NAME"), object_name)
+        bucket_name = os.getenv("S3_BUCKET_NAME")
+        if not bucket_name:
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="S3 bucket name is not set.")
+        image_url = upload_to_s3(image, bucket_name, object_name)
 
     # Create PokemonCreate object
     pokemon = PokemonCreate(
@@ -63,12 +66,12 @@ def create_pokemon_endpoint(
         abilities=abilities,
         stats=stats,
         types=types,
-        image_url=image_url  # Store the image URL here
+        image_url=image_url  
     )
 
     return create_pokemon(db=db, pokemon=pokemon)
 
-@router.get("/pokemon/{pokemon_id}", response_model=Pokemon, status_code=status.HTTP_200_OK)
+@router.get("/pokemon/{pokemon_id}", response_model=Pokemon, status_code=status.HTTP_200_OK, dependencies=[Depends(JWTBearer())])
 def get_pokemon_endpoint(pokemon_id: int, db: Session = Depends(get_db), response: Response = None):
     """
     Endpoint to retrieve a Pokémon by ID.
@@ -80,7 +83,6 @@ def get_pokemon_endpoint(pokemon_id: int, db: Session = Depends(get_db), respons
 
     message = "Image exists in S3 bucket."
 
-    # Check if the Pokémon has an image URL
     if db_pokemon.image_url:
         bucket_name = os.getenv("S3_BUCKET_NAME")
 
@@ -92,7 +94,6 @@ def get_pokemon_endpoint(pokemon_id: int, db: Session = Depends(get_db), respons
     else:
         message = "This Pokémon doesn't have any image URL."
 
-    # Set response headers
     response.headers["X-Image-URL"] = db_pokemon.image_url if db_pokemon.image_url else "No image URL"
     response.headers["X-Message"] = message
 
@@ -123,7 +124,7 @@ def get_all_pokemon_endpoint(
         max_weight=max_weight
     )
 
-@router.patch("/pokemon/{pokemon_id}", response_model=Pokemon, status_code=status.HTTP_200_OK)#, dependencies=[Depends(JWTBearer())])
+@router.patch("/pokemon/{pokemon_id}", response_model=Pokemon, status_code=status.HTTP_200_OK, dependencies=[Depends(JWTBearer())])
 def update_pokemon_endpoint(
     pokemon_id: int,
     name: Optional[str] = Form(None),
@@ -135,7 +136,7 @@ def update_pokemon_endpoint(
     stats: Optional[str] = Form(None, description='Example: [{"name": "Speed", "base_stat": 90}, {"name": "Attack", "base_stat": 55}]'),  # JSON string
     types: Optional[str] = Form(None, description='Example: [{"name": "Electric"}]'),  # JSON string
     db: Session = Depends(get_db),
-    image: Optional[UploadFile] = File(None)  # Image file
+    image: Optional[UploadFile] = File(None)  
 ):
     """
     Endpoint to partially update a Pokémon.
