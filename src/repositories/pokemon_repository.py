@@ -11,7 +11,7 @@ def get_pokemon(db: Session, pokemon_id: int):
     """Retrieve a Pokémon by its ID."""
     return db.query(Pokemon).filter(Pokemon.id == pokemon_id).first()
 
-def get_all_pokemon(db: Session, skip: int = 0, limit: int = 100, name: str = None, min_height: int = None, max_height: int = None, min_weight: int = None, max_weight: int = None):
+def get_all_pokemon(db: Session, skip: int = 0, limit: int=None, name: str = None, min_height: int = None, max_height: int = None, min_weight: int = None, max_weight: int = None):
     """Retrieve all Pokémon with optional filters and pagination."""
     query = db.query(Pokemon)
     
@@ -25,7 +25,14 @@ def get_all_pokemon(db: Session, skip: int = 0, limit: int = 100, name: str = No
         query = query.filter(Pokemon.weight >= min_weight)
     if max_weight is not None:
         query = query.filter(Pokemon.weight <= max_weight)
-    
+
+    query = query.order_by(Pokemon.id.asc())
+
+    if skip is not None:
+        query = query.offset(skip)
+    if limit is not None:
+        query = query.limit(limit)
+
     return query.offset(skip).limit(limit).all()
 
 def create_pokemon(db: Session, pokemon: PokemonCreate):

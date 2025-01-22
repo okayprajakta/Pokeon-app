@@ -1,4 +1,4 @@
-#!c:\users\prajakta.survase\onedrive - oneworkplace\desktop\alembic copy\venv\scripts\python.exe
+#!c:\users\prajakta.survase\onedrive - oneworkplace\desktop\test\pokeon-app\venv\scripts\python.exe
 
 import sys
 import json

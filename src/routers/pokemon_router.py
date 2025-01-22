@@ -82,8 +82,8 @@ def get_pokemon_endpoint(pokemon_id: int, db: Session = Depends(get_db), respons
 
 @router.get("/pokemon/", response_model=List[PokemonBase], status_code=status.HTTP_200_OK, dependencies=[Depends(JWTBearer())])
 def get_all_pokemon_endpoint(
-    skip: int = 0,
-    limit: int = 10,
+    skip: Optional[int] = None,
+    limit: Optional[int] = None,
     name: Optional[str] = Query(None, description="Filter by name"),
     min_height: Optional[int] = Query(None, description="Filter by minimum height"),
     max_height: Optional[int] = Query(None, description="Filter by maximum height"),
@@ -104,7 +104,6 @@ def get_all_pokemon_endpoint(
         min_weight=min_weight, 
         max_weight=max_weight
     )
-
 @router.patch("/pokemon/{pokemon_id}", response_model=Pokemon, status_code=status.HTTP_200_OK, dependencies=[Depends(JWTBearer())])
 def update_pokemon_endpoint(
     pokemon_id: int,
