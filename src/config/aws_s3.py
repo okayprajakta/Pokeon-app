@@ -39,12 +39,3 @@ def validate_image_file(file):
     if imghdr.what(file.file) not in ALLOWED_EXTENSIONS:
         raise HTTPException(status_code=400, detail="Invalid image file")
     file.file.seek(0)
-
-def check_image_exists_in_s3(bucket_name, object_name):
-    """Check if an image exists in the S3 bucket."""
-    s3 = boto3.client('s3')
-    try:
-        s3.head_object(Bucket=bucket_name, Key=object_name)
-        return True
-    except ClientError:
-        return False

@@ -2,13 +2,12 @@ import os
 from fastapi import APIRouter, Depends, HTTPException, status, Query, File, UploadFile, Form, Response
 from sqlalchemy.orm import Session
 from src.repositories.pokemon_repository import create_pokemon, get_pokemon, get_all_pokemon, update_pokemon, delete_pokemon
-from src.schemas.pokemon_schema import PokemonCreate, PokemonUpdate, Pokemon, PokemonBase, Ability
+from src.schemas.pokemon_schema import PokemonCreate, Pokemon, PokemonBase
 from typing import List, Optional
 from src.config.database import SessionLocal
 from src.middleware.auth_middleware import JWTBearer
 import json
-from src.config.aws_s3 import upload_to_s3, validate_image_file, check_image_exists_in_s3
-from urllib.parse import urlparse
+from src.config.aws_s3 import upload_to_s3, validate_image_file
 from dotenv import load_dotenv
 
 load_dotenv()  
@@ -77,26 +76,8 @@ def get_pokemon_endpoint(pokemon_id: int, db: Session = Depends(get_db), respons
     Endpoint to retrieve a Pokémon by ID.
     """
     db_pokemon = get_pokemon(db, pokemon_id)
-
     if db_pokemon is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Pokemon not found")
-
-    message = "Image exists in S3 bucket."
-
-    if db_pokemon.image_url:
-        bucket_name = os.getenv("S3_BUCKET_NAME")
-
-        # Check if the image URL contains the S3 bucket name
-        if bucket_name in db_pokemon.image_url:
-            message = "This Pokémon has an image in the S3 bucket."
-        else:
-            message = "This Pokémon has an image URL but it doesn't have any image in the S3 bucket."
-    else:
-        message = "This Pokémon doesn't have any image URL."
-
-    response.headers["X-Image-URL"] = db_pokemon.image_url if db_pokemon.image_url else "No image URL"
-    response.headers["X-Message"] = message
-
     return db_pokemon
 
 @router.get("/pokemon/", response_model=List[PokemonBase], status_code=status.HTTP_200_OK, dependencies=[Depends(JWTBearer())])
